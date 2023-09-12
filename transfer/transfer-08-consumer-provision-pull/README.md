@@ -59,8 +59,8 @@ Java modules:
 * `backend-service`: represent the backend service where the consumer connector will send the
   EndpointDataReference to access the data
 
-> [!NOTE] For the sake of simplicity, we will use an in-memory catalog and fill it with just one single
-> [!NOTE] asset. The in-memory catalog isn't persistent, and it's lost after every connector's shutdown.
+> [!NOTE]
+> For the sake of simplicity, we will use an in-memory catalog and fill it with just one single asset. The in-memory catalog isn't persistent, and it's lost after every connector's shutdown.
 
 # Prepare the environment
 
@@ -123,8 +123,8 @@ curl -X POST http://oatmeal:8001/services \
 ```
 
 
-> [!NOTE] In Kong, a service defines the backend data source, while a route defines the API endpoint where to access it.
-> [!NOTE] In this sample the producer connector provisions a route for a known service. 
+> [!NOTE]
+> In Kong, a service defines the backend data source, while a route defines the API endpoint where to access it. In this sample the producer connector provisions a route for a known service. 
 
 
 Here's a visual representation of the components that make this provisioning possible:
@@ -191,7 +191,8 @@ val edcVersion = "0.2.1"
     implementation("${edcGroupId}:provision-http:${edcVersion}")
     implementation(libs.edc.data.plane.client)
 ```
-> [!NOTE] **N.B.:** change the edcVersion value to the current one.
+> [!NOTE]
+> **N.B.:** change the edcVersion value to the current one.
 
 To build the connector execute the following command:
 
@@ -276,7 +277,8 @@ ports `12181`, `19182` (management API) and `19282` (IDS API).
 Running this sample consists of multiple steps, that are executed one by one and following the same
 order.
 
-> [!NOTE] If you have some issues with the jq option, know that it's not mandatory because it is just used to format the output.
+> [!NOTE]
+> If you have some issues with the jq option, know that it's not mandatory because it is just used to format the output.
 
 ### 1. Register data plane instance for provider
 
@@ -361,8 +363,9 @@ curl -d '{
          -s | jq
 ```
 
-> [!NOTE] The `baseUrl` property of the `dataAddress` is a placeholder. It is replaced by the effective data source when provisioning happens.  
-> [!NOTE] The BaseUrl can be omitted, nevertheless it should be kept in the configuration if the asset must be consumed by a non-provisioned data sharing.
+> [!NOTE]
+> The `baseUrl` property of the `dataAddress` is a placeholder. It is replaced by the effective data source when provisioning happens. 
+> The BaseUrl can be omitted, nevertheless it should be kept in the configuration if the asset must be consumed by a non-provisioned data sharing.
 
 Additional properties on `HttpData` can be used to allow consumers to enrich the data request:
 
@@ -517,7 +520,8 @@ The sequence looks as follows:
 Of course, this is the simplest possible negotiation sequence. Later on, both connectors can also
 send counter offers in addition to just confirming or declining an offer.
 
-> [!NOTE] The contract negotiation needs the ```offerId``` of the asset that we want to share. Be sure to copy its value from the output of the command we executed in the previous step (the catalog request).
+> [!NOTE]
+> The contract negotiation needs the ```offerId``` of the asset that we want to share. Be sure to copy its value from the output of the command we executed in the previous step (the catalog request).
 
 ```bash
 curl -d '{
@@ -572,7 +576,8 @@ negotiation sequence between provider and consumer is executed asynchronously in
 state machine. Once both provider and consumer either reach the `confirmed` or the  `declined`
 state, the negotiation is finished. 
 
-> [!NOTE]Be sure to replace the UUID on the command below with the one from the output of the previous command.
+> [!NOTE]
+> Be sure to replace the UUID on the command below with the one from the output of the previous command.
 
 ```bash
 curl -X GET "http://oatmeal:29193/management/v2/contractnegotiations/5c05b9e3-dc36-48b5-b27a-c33cd88a9cf5" \
@@ -618,7 +623,8 @@ Now that we have a contract agreement, **we can finally request the file.**
 In the request body, we need to specify which asset we want transferred, the ID of the contract agreement, the address of the provider connector and where we want the file transferred. You will find the request body below.
 Before executing the request, insert the contract agreement ID from the previous step. 
 
-> [!NOTE] Be sure to copy the value of ```edc:contractAgreementId``` from the result of the previous call as the value of the ```contractId``` in the following command:
+> [!NOTE]
+> Be sure to copy the value of ```edc:contractAgreementId``` from the result of the previous call as the value of the ```contractId``` in the following command:
 
 ```bash
 curl -X POST "http://oatmeal:29193/management/v2/transferprocesses" \
