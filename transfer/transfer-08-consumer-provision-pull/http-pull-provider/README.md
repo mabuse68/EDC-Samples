@@ -11,8 +11,10 @@ HTTP Provisioning works this way:
 
  The connector configuration file can be found here: [provider-configuration.properties](http-pull-prov-provider/provider-configuration.properties)
 
+
  ## Properties
- > [!NOTE] The host where both the connector and the provisioner service run must have a resolvable hostname. The callback system doesn't work with ```localhost```.
+ > [!NOTE]
+ > The host where both the connector and the provisioner service run must have a resolvable hostname. The callback system doesn't work with ```localhost```.
  
 ### HTTP Pull properties
  ```java

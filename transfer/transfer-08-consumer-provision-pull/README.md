@@ -4,6 +4,7 @@ This example builds on Transfer-06-consumer-pull usecase, but it adds the capabi
 
 The purpose of this example is to implement the flow for dynamic source provisioning, and share the data between 2 connectors on a proxied connection.
 
+
 The usecase needs the following components:
 * A data source, we choose an [LDES](https://semiceu.github.io/LinkedDataEventStreams/) data stream of water quality sensors (read further in this document).
 * The Provider Connector.
@@ -26,6 +27,7 @@ For the sake of simplicity, all the components run on the same machine.
 # What this demo delivers
 At the end of this example the reader will have an understanding of the necessary steps to implement a data transfer where the data source is dynamically provisioned.
 
+
 The steps are the following:
 
 * Install an API manager (Kong) and ceate a service to expose a data sorce
@@ -39,8 +41,8 @@ The steps are the following:
 * Create an access policy on the provider (The policy will define the access right to the data)
 * Create a contract definition on the provider
 
-At this step, the consumer should be able to fetch the catalog from the provider and to see the
-contract offer generated from the resources that have been created.
+The consumer is now able to fetch the catalog from the provider and to see the
+contract offerings generated from the resources that have been created.
 
 Once the catalog is available, to access the data, the consumer should follow the following steps:
 
@@ -62,9 +64,13 @@ Java modules:
 > [!NOTE]
 > For the sake of simplicity, we will use an in-memory catalog and fill it with just one single asset. The in-memory catalog isn't persistent, and it's lost after every connector's shutdown.
 
+
 # Prepare the environment
 
 ## Resolve a specific hostname
+This step is mandatory, the provisioning extension works only if the hostname where the connector runs is resolvable.
+
+
 If you run this on a Linux or OSX machine, set a hostname and configure the local resolver.
 On you shell of choice (bash in the example here):
 ```bash
@@ -122,16 +128,19 @@ curl -X POST http://oatmeal:8001/services \
 --data url='http://ldes.vsds.odt.imec-apt.be/water-quality-observations' -s | jq
 ```
 
-
 > [!NOTE]
 > In Kong, a service defines the backend data source, while a route defines the API endpoint where to access it. In this sample the producer connector provisions a route for a known service. 
 
 
 Here's a visual representation of the components that make this provisioning possible:
+
+
 ![Diagram of an EDC connector provisioning an API endpoint on a Kong API manager](pictures/API-Services-and-routes.png)
 
 
 Both services and routes can be configured to implement access control, parameter substitution, header injection, or any other exotic HTTP configuration that one might concoct.
+
+### Useful Kong commands
 
 For convenience, we list some useful Kong management commands:
 ```bash
@@ -156,11 +165,13 @@ curl -i -X DELETE http://oatmeal:8001/services/ldesservice/routes/ldesStream
 
 You now have all instruments you need to play with KONG's API Services and Routes.
 
+
 ## Install Uvicorn
 Provided you have Python on your machine, install the Uvicorn package that we will use to implement the Provisioning API service.
 ```bash
 pip install uvicorn
 ```
+
 
 ## Run the Provisioner Service
 Once a consumer connector requests a data transfer, the producer connector sends a POST request to the Provisioning Service before the actual data transfer takes place.
@@ -173,6 +184,7 @@ Start the Provisioning-API service from this root folder by executing this comma
 ```bash
 uvicorn transfer/transfer-08-consumer-provision-pull/provisioner-service/provisioning-API:app --reload --port 8881
 ```
+
 
 ## Build the connector
 The build file of the connector is located here:
@@ -272,13 +284,16 @@ Assuming you didn't change the ports in config files, the consumer will listen o
 ports `29191`, `29192` (management API) and `29292` (IDS API) and the provider will listen on the
 ports `12181`, `19182` (management API) and `19282` (IDS API).
 
+
 # Run the sample
 
 Running this sample consists of multiple steps, that are executed one by one and following the same
 order.
 
+
 > [!NOTE]
 > If you have some issues with the jq option, know that it's not mandatory because it is just used to format the output.
+
 
 ### 1. Register data plane instance for provider
 

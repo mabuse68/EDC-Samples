@@ -126,4 +126,4 @@ async def getData(request: Request, edcRequest: EdcRequest):
     print(separator)
     
     #jsonmessage = json.dumps({"message":current_time})
-    return {"response:":  edc.Request}
+    return {"response:":  edcRequest.Request}
