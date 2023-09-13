@@ -134,8 +134,16 @@ curl -X POST http://oatmeal:8001/services \
 > [!NOTE]
 > In Kong, a service defines the backend data source, while a route defines the API endpoint where to access it. In this sample the producer connector provisions a route for a known service. 
 
+The source LDES server demands that every request contains the Accept header, preferably with value text:turtle. However the connector proxy doesn't seem to support such header in the native request. We solve this issue with a hack: we add the header on all upstream requests via Kong:
 
-Here's a visual representation of the components that make this provisioning possible:
+```bash
+curl -X POST http://localhost:8001/services/ldesservice/plugins \
+    --data "name=request-transformer"  \
+    --data "config.add.headers=accept:text/turtle" | jq 
+```
+
+
+The diagram below resumes the whole setup:
 
 
 ![Diagram of an EDC connector provisioning an API endpoint on a Kong API manager](pictures/API-Services-and-routes.png)
@@ -143,30 +151,7 @@ Here's a visual representation of the components that make this provisioning pos
 
 Both services and routes can be configured to implement access control, parameter substitution, header injection, or any other exotic HTTP configuration that one might concoct.
 
-### Useful Kong commands
-
-For convenience, we list some useful Kong management commands:
-```bash
-### Change a service:
-curl -X PATCH http://oatmeal:8001/services/ldesservice \
---data url='http://ldes.vsds.odt.imec-apt.be/water-quality-observationsby-time?created=2023-07-13T14:00:27.956Z' -s | jq
-
-### Create a route (this will be created by the provisioner):
-curl -i -s -X POST http://oatmeal:8001/services/ldesservice/routes \
- --data 'paths[]=/ldesroute' \
- --data 'name=ldesroute' | jq
-
-### List Services, list routes:
-curl -X GET http://oatmeal:8001/services -s | jq
-curl -X GET http://oatmeal:8001/routes -s | jq
-
-### Delete Services, delete routes:
-curl -i -X DELETE http://oatmeal:8001/services/ldesservice
-curl -i -X DELETE http://oatmeal:8001/routes/ldesStream
-curl -i -X DELETE http://oatmeal:8001/services/ldesservice/routes/ldesStream
-```
-
-You now have all instruments you need to play with KONG's API Services and Routes.
+See [here](transfer/transfer-08-consumer-provision-pull/kong-commands.md) for a list of Kong commands that might be useful during testing and experimenting.
 
 
 ## Install Uvicorn
@@ -800,5 +785,4 @@ water-quality-observations:shape
 ```
 
 Since we configured the `HttpData` with `proxyPath`, we could also ask for a specific fragmentation:
-
-TBD
+> NOT YET WORKING
