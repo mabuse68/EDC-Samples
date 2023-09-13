@@ -187,12 +187,12 @@ Start the Provisioning-API service from this root folder by executing this comma
 ```bash
 uvicorn uvicorn transfer.transfer-08-consumer-provision-pull.provisioner-service.provisioning-API:app --reload --port 8881
 ```
-
+**N.B.:** notice the dotted notation of the path where Uvicorn can find the App.
 
 ## Build the connector
 The build file of the connector is located here:
 ```bash
-./transfer-08-consumer-provision-pull/http-pull-prov-connector/build.gradle.kts
+transfer/transfer-08-consumer-provision-pull/http-pull-prov-connector/build.kts
 ```
 The build configuration file includes the extensions needed to enable provisioning (it's not a standard extension). Never mind the naming conventions of packages, as they aren't consistent in the EDC project at the time of writing. 
 
@@ -209,14 +209,14 @@ val edcVersion = "0.2.1"
 > [!NOTE]
 > **N.B.:** change the edcVersion value to the current one.
 
-To build the connector execute the following command:
+Build the connector by executing the following command:
 
 ```bash
 ./gradlew transfer:transfer-08-consumer-pull-prov:http-pull-prov-connector:build
 ```
 
 After the build ends, you can verify that the connector jar is created in the directory
-[http-pull-connector.jar](http-pull-connector/build/libs/http-pull-connector.jar)
+[http-pull-prov-connector.jar](http-pull-prov-connector/build/libs/http-pull-prov-connector.jar)
 
 
 ### Configure the two connectors
@@ -274,13 +274,13 @@ Enough with building and configuring. Let's start sharing data dynamically!
 To run the provider, just run the following command
 
 ```bash
-java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-connector/build/libs/pull-connector.jar
+java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-prov-connector/build/libs/pull-connector.jar
 ```
 
 To run a consumer, just run the following command
 
 ```bash
-java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-connector/build/libs/pull-connector.jar
+java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-prov-connector/build/libs/pull-connector.jar
 ```
 
 Assuming you didn't change the ports in config files, the consumer will listen on the
@@ -312,7 +312,6 @@ This describes an HTTP data source, like a REST API. The ```HTTPData``` source t
 This data sink type uses the connector as Proxy.
 
 ```bash
-// Register Dataplane that allows httpProvision on Provider
 curl -H 'Content-Type: application/json' \
      -d '{
            "@context": {
@@ -633,8 +632,8 @@ As a pre-requisite, you need to have a backend service that runs on port 4000.
 The service receives from the provider a POST method with the authorization token to read the data. It dumps it on its standard output (console).
 
 ```bash
-./gradlew transfer:transfer-08-consumer-provision-pull:consumer-pull-backend-service:build
-java -jar transfer/transfer-08-consumer-provision-pull/consumer-pull-backend-service/build/libs/consumer-pull-backend-service.jar
+./gradlew util:http-request-logger:build HTTP_SERVER_PORT=4000
+java -jar util/http-request-logger/build/libs/http-request-logger.jar
 ```
 
 Now that we have a contract agreement, **we can finally request the file.**
