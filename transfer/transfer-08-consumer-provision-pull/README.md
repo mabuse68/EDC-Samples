@@ -82,6 +82,9 @@ Add the following line to the hosts file:
 ```
 Where oatmeal is the hostname we will use in this example, you can use another hostname if you prefer.
 
+> [!NOTE]
+> From now on, all shell commands are executed from the root directory of this repository, adjust relative paths consequently if you work from another directory.
+
 
 ## Install and configure the API manager
 
@@ -182,7 +185,7 @@ The [Provisioning-API](./Provisioner-service/provisioning-API.py) service is our
 Start the Provisioning-API service from this root folder by executing this command:
 
 ```bash
-uvicorn transfer/transfer-08-consumer-provision-pull/provisioner-service/provisioning-API:app --reload --port 8881
+uvicorn uvicorn transfer.transfer-08-consumer-provision-pull.provisioner-service.provisioning-API:app --reload --port 8881
 ```
 
 

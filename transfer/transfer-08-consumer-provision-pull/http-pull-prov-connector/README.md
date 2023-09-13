@@ -2,7 +2,7 @@
 The build file of the connector is located here:
 
 ```bash
-./transfer-08-consumer-provision-pull/http-pull-prov-connector/build.gradle.kts
+./transfer/transfer-08-consumer-provision-pull/http-pull-prov-connector/build.gradle.kts
 ```
 
 The build configuration file includes the extensions needed to enable provisioning (it's not a standard extension). Never mind the naming conventions of packages, as they aren't consistent in the EDC project at the time of writing. 

@@ -12,8 +12,6 @@
  *
  */
 
-// ProvisionHTTP package can be found on the maven repository of the EDC project
-
 val edcGroupId = "org.eclipse.edc"
 val edcVersion = "0.2.1"
 
