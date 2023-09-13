@@ -82,6 +82,9 @@ Add the following line to the hosts file:
 ```
 Where oatmeal is the hostname we will use in this example, you can use another hostname if you prefer.
 
+> [!NOTE]
+> From now on, all shell commands are executed from the root directory of this repository, adjust relative paths consequently if you work from another directory.
+
 
 ## Install and configure the API manager
 
@@ -131,8 +134,16 @@ curl -X POST http://oatmeal:8001/services \
 > [!NOTE]
 > In Kong, a service defines the backend data source, while a route defines the API endpoint where to access it. In this sample the producer connector provisions a route for a known service. 
 
+The source LDES server demands that every request contains the Accept header, preferably with value text:turtle. However the connector proxy doesn't seem to support such header in the native request. We solve this issue with a hack: we add the header on all upstream requests via Kong:
 
-Here's a visual representation of the components that make this provisioning possible:
+```bash
+curl -X POST http://localhost:8001/services/ldesservice/plugins \
+    --data "name=request-transformer"  \
+    --data "config.add.headers=accept:text/turtle" | jq 
+```
+
+
+The diagram below resumes the whole setup:
 
 
 ![Diagram of an EDC connector provisioning an API endpoint on a Kong API manager](pictures/API-Services-and-routes.png)
@@ -140,30 +151,7 @@ Here's a visual representation of the components that make this provisioning pos
 
 Both services and routes can be configured to implement access control, parameter substitution, header injection, or any other exotic HTTP configuration that one might concoct.
 
-### Useful Kong commands
-
-For convenience, we list some useful Kong management commands:
-```bash
-### Change a service:
-curl -X PATCH http://oatmeal:8001/services/ldesservice \
---data url='http://ldes.vsds.odt.imec-apt.be/water-quality-observationsby-time?created=2023-07-13T14:00:27.956Z' -s | jq
-
-### Create a route (this will be created by the provisioner):
-curl -i -s -X POST http://oatmeal:8001/services/ldesservice/routes \
- --data 'paths[]=/ldesroute' \
- --data 'name=ldesroute' | jq
-
-### List Services, list routes:
-curl -X GET http://oatmeal:8001/services -s | jq
-curl -X GET http://oatmeal:8001/routes -s | jq
-
-### Delete Services, delete routes:
-curl -i -X DELETE http://oatmeal:8001/services/ldesservice
-curl -i -X DELETE http://oatmeal:8001/routes/ldesStream
-curl -i -X DELETE http://oatmeal:8001/services/ldesservice/routes/ldesStream
-```
-
-You now have all instruments you need to play with KONG's API Services and Routes.
+See [here](transfer/transfer-08-consumer-provision-pull/kong-commands.md) for a list of Kong commands that might be useful during testing and experimenting.
 
 
 ## Install Uvicorn
@@ -182,14 +170,14 @@ The [Provisioning-API](./Provisioner-service/provisioning-API.py) service is our
 Start the Provisioning-API service from this root folder by executing this command:
 
 ```bash
-uvicorn transfer/transfer-08-consumer-provision-pull/provisioner-service/provisioning-API:app --reload --port 8881
+uvicorn uvicorn transfer.transfer-08-consumer-provision-pull.provisioner-service.provisioning-API:app --reload --port 8881
 ```
-
+**N.B.:** notice the dotted notation of the path where Uvicorn can find the App.
 
 ## Build the connector
 The build file of the connector is located here:
 ```bash
-./transfer-08-consumer-provision-pull/http-pull-prov-connector/build.gradle.kts
+transfer/transfer-08-consumer-provision-pull/http-pull-prov-connector/build.kts
 ```
 The build configuration file includes the extensions needed to enable provisioning (it's not a standard extension). Never mind the naming conventions of packages, as they aren't consistent in the EDC project at the time of writing. 
 
@@ -206,14 +194,14 @@ val edcVersion = "0.2.1"
 > [!NOTE]
 > **N.B.:** change the edcVersion value to the current one.
 
-To build the connector execute the following command:
+Build the connector by executing the following command:
 
 ```bash
 ./gradlew transfer:transfer-08-consumer-pull-prov:http-pull-prov-connector:build
 ```
 
 After the build ends, you can verify that the connector jar is created in the directory
-[http-pull-connector.jar](http-pull-connector/build/libs/http-pull-connector.jar)
+[http-pull-prov-connector.jar](http-pull-prov-connector/build/libs/http-pull-prov-connector.jar)
 
 
 ### Configure the two connectors
@@ -271,13 +259,13 @@ Enough with building and configuring. Let's start sharing data dynamically!
 To run the provider, just run the following command
 
 ```bash
-java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-connector/build/libs/pull-connector.jar
+java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-provider/provider-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-prov-connector/build/libs/pull-connector.jar
 ```
 
 To run a consumer, just run the following command
 
 ```bash
-java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-connector/build/libs/pull-connector.jar
+java -Dedc.keystore=transfer/transfer-08-consumer-provision-pull/certs/cert.pfx -Dedc.keystore.password=123456 -Dedc.vault=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-vault.properties -Dedc.fs.config=transfer/transfer-08-consumer-provision-pull/http-pull-consumer/consumer-configuration.properties -jar transfer/transfer-08-consumer-provision-pull/http-pull-prov-connector/build/libs/pull-connector.jar
 ```
 
 Assuming you didn't change the ports in config files, the consumer will listen on the
@@ -309,7 +297,6 @@ This describes an HTTP data source, like a REST API. The ```HTTPData``` source t
 This data sink type uses the connector as Proxy.
 
 ```bash
-// Register Dataplane that allows httpProvision on Provider
 curl -H 'Content-Type: application/json' \
      -d '{
            "@context": {
@@ -630,8 +617,8 @@ As a pre-requisite, you need to have a backend service that runs on port 4000.
 The service receives from the provider a POST method with the authorization token to read the data. It dumps it on its standard output (console).
 
 ```bash
-./gradlew transfer:transfer-08-consumer-provision-pull:consumer-pull-backend-service:build
-java -jar transfer/transfer-08-consumer-provision-pull/consumer-pull-backend-service/build/libs/consumer-pull-backend-service.jar
+./gradlew util:http-request-logger:build HTTP_SERVER_PORT=4000
+java -jar util/http-request-logger/build/libs/http-request-logger.jar
 ```
 
 Now that we have a contract agreement, **we can finally request the file.**
@@ -798,5 +785,4 @@ water-quality-observations:shape
 ```
 
 Since we configured the `HttpData` with `proxyPath`, we could also ask for a specific fragmentation:
-
-TBD
+> NOT YET WORKING
