@@ -4,7 +4,7 @@ For convenience, we list some useful Kong management commands:
 ```bash
 ### Change a service:
 curl -X PATCH http://oatmeal:8001/services/ldesservice \
---data url='http://ldes.vsds.odt.imec-apt.be/water-quality-observationsby-time?created=2023-07-13T14:00:27.956Z' -s | jq
+--data url='http://ldes.vsds.odt.imec-apt.be/water-quality-observations/by-time?created=2023-07-13T14:00:27.956Z' -s | jq
 
 ### Create a route (this will be created by the provisioner):
 curl -X POST http://oatmeal:8001/services/ldesservice/routes \
