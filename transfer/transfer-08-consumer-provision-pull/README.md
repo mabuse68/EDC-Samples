@@ -170,7 +170,7 @@ The [Provisioning-API](./Provisioner-service/provisioning-API.py) service is our
 Start the Provisioning-API service from this root folder by executing this command:
 
 ```bash
-uvicorn uvicorn transfer.transfer-08-consumer-provision-pull.provisioner-service.provisioning-API:app --reload --port 8881
+uvicorn transfer.transfer-08-consumer-provision-pull.provisioner-service.provisioning-API:app --reload --port 8881
 ```
 **N.B.:** notice the dotted notation of the path where Uvicorn can find the App.
 
@@ -618,6 +618,7 @@ The service receives from the provider a POST method with the authorization toke
 
 ```bash
 ./gradlew util:http-request-logger:build HTTP_SERVER_PORT=4000
+
 java -jar util/http-request-logger/build/libs/http-request-logger.jar
 ```
 
@@ -784,5 +785,10 @@ water-quality-observations:shape
                            ] .
 ```
 
-Since we configured the `HttpData` with `proxyPath`, we could also ask for a specific fragmentation:
-> NOT YET WORKING
+# Caveat Emptor: still to be implemented / extended
+
+- Headers are not passed through this configuration, see [This discussion thread](https://github.com/eclipse-edc/Connector/discussions/2107#discussioncomment-6923928).
+
+- Params are not passed on the HTTPData data type.
+  -  Either refactor this sample with HTTPProxy data type
+  - Or define params statically on the Provider (forcing us to publish an asset per fragment). See [This discussion thread](https://github.com/eclipse-edc/Connector/discussions/2107#discussioncomment-6914331) on the subject. 
